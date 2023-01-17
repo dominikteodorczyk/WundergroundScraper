@@ -1,7 +1,8 @@
 from selenium import webdriver
 from datetime import datetime
 import pandas as pd
-from time import sleep
+from time import sleep, time
+from decimal import Decimal
 
 class SiteObject():
 
@@ -28,18 +29,36 @@ class SiteObject():
     def getData(self):
 
         history_site = self.getHistorySite()
-        all_data = pd.DataFrame()
+        all_data = pd.DataFrame(columns=['time', 'temp', 'dew_point', 'hum', 'wind', 'wind_speed', 'wind_gust', 'press', 'precip', 'condition'])
 
 
         DateFrame = DaysURLs(self.start, self.end).getDaysList()
         for i in list(DateFrame):
-            day_url = history_site + "/date/" + i.strftime("%Y-%m-%d").replace("-0","-")
+            start= time()
+            dzien = i.strftime("%Y-%m-%d").replace("-0","-")
+            day_url = history_site + "/date/" + dzien
             self.driver.get(day_url)
-            table_object = self.driver.find_element_by_class_name('mat-column-dateString')
-            
             sleep(1)
-            print(table_object)
 
+            day_data = pd.DataFrame(columns=['time', 'temp', 'dew_point', 'hum', 'wind', 'wind_speed', 'wind_gust', 'press', 'precip', 'condition'])
+
+            for i in range(1,25):
+                day_data = day_data.append({
+                    'time': self.driver.find_element_by_xpath(f"//table/tbody/tr[{i}]/td[1]/span").text,
+                    'temp' : float(format(((int(self.driver.find_element_by_xpath(f"//table/tbody/tr[{i}]/td[2]/lib-display-unit/span/span[1]").text) - 32) * (5/9)),".2f")),
+                    'dew_point' : float(format(((int(self.driver.find_element_by_xpath(f"//table/tbody/tr[{i}]/td[3]/lib-display-unit/span/span[1]").text) - 32) * (5/9)),".2f")),
+                    'hum' : float(self.driver.find_element_by_xpath(f"//table/tbody/tr[{i}]/td[4]/lib-display-unit/span/span[1]").text),
+                    'wind' : self.driver.find_element_by_xpath(f"//table/tbody/tr[{i}]/td[5]/span").text,
+                    'wind_speed' : float(format((1.609344*int(self.driver.find_element_by_xpath(f"//table/tbody/tr[{i}]/td[6]/lib-display-unit/span/span[1]").text)),".2f")),
+                    'wind_gust' : float(format((1.609344*int(self.driver.find_element_by_xpath(f"//table/tbody/tr[{i}]/td[7]/lib-display-unit/span/span[1]").text)),".2f")),
+                    'press' : float(format((float(self.driver.find_element_by_xpath(f"//table/tbody/tr[{i}]/td[8]/lib-display-unit/span/span[1]").text)),".2f")),
+                    'precip' : float(format((float(self.driver.find_element_by_xpath(f"//table/tbody/tr[{i}]/td[9]/lib-display-unit/span/span[1]").text)),".2f")),
+                    'condition' : self.driver.find_element_by_xpath(f"//table/tbody/tr[{i}]/td[10]/span").text
+                    },ignore_index = True)
+
+            all_data = all_data.append(day_data)
+
+        all_data.to_csv('test.csv', mode='w')
 
 
 class DayPageExtractor():
@@ -51,7 +70,7 @@ class DayPageExtractor():
 
     def getTableContent(self):
 
-        table_object = self.driver.find_elements_by_class_name("mat-table cdk-table mat-sort ng-star-inserted")
+        table_object = self.driver.find_elements_by_
         print(table_object)
 
 
