@@ -51,8 +51,8 @@ class SiteObject():
                     'wind' : self.driver.find_element_by_xpath(f"//table/tbody/tr[{i}]/td[5]/span").text,
                     'wind_speed' : float(format((1.609344*int(self.driver.find_element_by_xpath(f"//table/tbody/tr[{i}]/td[6]/lib-display-unit/span/span[1]").text)),".2f")),
                     'wind_gust' : float(format((1.609344*int(self.driver.find_element_by_xpath(f"//table/tbody/tr[{i}]/td[7]/lib-display-unit/span/span[1]").text)),".2f")),
-                    'press' : float(format((float(self.driver.find_element_by_xpath(f"//table/tbody/tr[{i}]/td[8]/lib-display-unit/span/span[1]").text)),".2f")),
-                    'precip' : float(format((float(self.driver.find_element_by_xpath(f"//table/tbody/tr[{i}]/td[9]/lib-display-unit/span/span[1]").text)),".2f")),
+                    'press' : float(format((float(self.driver.find_element_by_xpath(f"//table/tbody/tr[{i}]/td[8]/lib-display-unit/span/span[1]").text)*0.003386/10000),".2f")),
+                    'precip' : float(format((float(self.driver.find_element_by_xpath(f"//table/tbody/tr[{i}]/td[9]/lib-display-unit/span/span[1]").text)*0.003386/10000),".2f")),
                     'condition' : self.driver.find_element_by_xpath(f"//table/tbody/tr[{i}]/td[10]/span").text
                     },ignore_index = True)
 
